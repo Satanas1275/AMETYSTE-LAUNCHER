@@ -1,0 +1,89 @@
+name: Launcher Build & Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: v${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: ${{ contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'alpha') }}
+
+  build-launcher:
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-14, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Archive build (ZIP)
+        if: runner.os != 'Windows'
+        run: zip -r build-${{ runner.os }}.zip dist/
+
+      - name: Archive build (EXE or ZIP for Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist\* -DestinationPath build-Windows.zip
+        shell: pwsh
+
+      - name: Upload build as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ runner.os }}
+          path: build-*.zip
+
+  upload-release-assets:
+    needs: [create-release, build-launcher]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
