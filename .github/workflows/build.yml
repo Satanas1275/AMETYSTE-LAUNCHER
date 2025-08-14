@@ -56,20 +56,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Archive build (ZIP)
-        if: runner.os != 'Windows'
-        run: zip -r build-${{ runner.os }}.zip dist/
-
-      - name: Archive build (EXE or ZIP for Windows)
-        if: runner.os == 'Windows'
-        run: Compress-Archive -Path dist\* -DestinationPath build-Windows.zip
-        shell: pwsh
-
       - name: Upload build as artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ runner.os }}
-          path: build-*.zip
+          path: |
+            dist/**   # <-- tous les fichiers générés dans dist/ seront uploadés
 
   upload-release-assets:
     needs: [create-release, build-launcher]
@@ -84,6 +76,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: artifacts/**/*
+          files: artifacts/**  # <-- tous les fichiers du build sont envoyés tels quels
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
