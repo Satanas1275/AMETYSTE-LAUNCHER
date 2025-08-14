@@ -64,33 +64,32 @@ class Splash {
             const latestVersion = (await res.text()).trim();
 
             if (latestVersion !== pkg.version) {
-                let downloadURL = '';
                 if (os.platform() === 'win32') {
-                    downloadURL = 'https://siphonium.alwaysdata.net/launcher/download/siphonium%20Launcher-win-x64.exe';
+                    const downloadURL = 'https://siphonium.alwaysdata.net/launcher/download/siphonium%20Launcher-win-x64.exe';
+                    this.setStatus(`Mise à jour disponible !<br><div class="download-update">Télécharger</div>`);
+
+                    document.querySelector(".download-update").addEventListener("click", async () => {
+                        const file = await nodeFetch(downloadURL);
+                        const buffer = Buffer.from(await file.arrayBuffer());
+                        const tmp = require('os').tmpdir();
+                        const fileName = path.join(tmp, path.basename(downloadURL));
+                        fs.writeFileSync(fileName, buffer);
+
+                        const { exec } = require('child_process');
+                        exec(`"${fileName}"`, (err) => {
+                            if (err) console.error(err);
+                        });
+
+                        this.shutdown("Téléchargement et installation en cours...");
+                    });
+
                 } else if (os.platform() === 'darwin') {
-                    downloadURL = 'https://siphonium.alwaysdata.net/launcher/download/siphonium%20Launcher-mac-universal.dmg';
+                    shell.openExternal('https://siphonium.github.io/update/mac');
+                    this.shutdown("Veuillez suivre les instructions pour mettre à jour votre launcher Mac.");
                 } else if (os.platform() === 'linux') {
                     shell.openExternal('https://siphonium.github.io/update/linux');
                     this.shutdown("Veuillez suivre les instructions pour mettre à jour votre launcher Linux.");
-                    return;
                 }
-
-                this.setStatus(`Mise à jour disponible !<br><div class="download-update">Télécharger</div>`);
-                document.querySelector(".download-update").addEventListener("click", async () => {
-                    const file = await nodeFetch(downloadURL);
-                    const buffer = Buffer.from(await file.arrayBuffer());
-                    const tmp = require('os').tmpdir();
-                    const fileName = path.join(tmp, path.basename(downloadURL));
-
-                    fs.writeFileSync(fileName, buffer);
-
-                    const { exec } = require('child_process');
-                    exec(`"${fileName}"`, (err) => {
-                        if (err) console.error(err);
-                    });
-
-                    this.shutdown("Téléchargement et installation en cours...");
-                });
 
             } else {
                 console.log("Launcher à jour.");
@@ -105,20 +104,17 @@ class Splash {
     async maintenanceCheck() {
         try {
             const res = await nodeFetch('https://siphonium.alwaysdata.net/launcher/config/launcher/config-launcher/config.json');
-            if (!res.ok) throw new Error("Impossible de récupérer la configuration.");
             const configLauncher = await res.json();
-
             if (configLauncher.maintenance) {
                 this.shutdown(configLauncher.maintenance_message);
             } else {
                 this.startLauncher();
             }
-        } catch (err) {
-            console.error(err);
-            this.shutdown("Impossible de vérifier la maintenance,<br>veuillez réessayer plus tard.");
+        } catch (e) {
+            console.error(e);
+            this.shutdown("Aucune connexion internet détectée,<br>veuillez réessayer ultérieurement.");
         }
     }
-
 
     startLauncher() {
         this.setStatus(`Démarrage du launcher`);
