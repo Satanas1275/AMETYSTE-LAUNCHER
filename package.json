@@ -14,7 +14,7 @@
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=true --build=platform",
-        "icon": "node build.js --icon=https://raw.githubusercontent.com/ROCKNITE-STUDIO/siphonium-launcher/refs/heads/main/src/assets/images/icon.png"
+        "icon": "node build.js --icon=https://github.com/SIPHONIUM/launcher/blob/12a012505ccc9e952df861cdeaff65e5cf3e57c7/src/assets/images/icon.png?raw=true"
     },
     "license": "CCANC",
     "nodemonConfig": {
@@ -42,3 +42,4 @@
         "url": "git+https://github.com/SIPHONIUM/launcher.git"
     }
 }
+
