@@ -18,7 +18,6 @@ jobs:
         run: |
           VERSION=$(jq -r .version package.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
@@ -56,12 +55,20 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Archive build (ZIP)
+        if: runner.os != 'Windows'
+        run: zip -r build-${{ runner.os }}.zip dist/
+
+      - name: Archive build (EXE or ZIP for Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist\* -DestinationPath build-Windows.zip
+        shell: pwsh
+
       - name: Upload build as artifact
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ runner.os }}
-          path: |
-            dist/**   # <-- tous les fichiers générés dans dist/ seront uploadés
+          path: build-*.zip
 
   upload-release-assets:
     needs: [create-release, build-launcher]
@@ -76,6 +83,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: artifacts/**  # <-- tous les fichiers du build sont envoyés tels quels
+          files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
