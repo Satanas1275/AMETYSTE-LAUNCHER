@@ -18,6 +18,11 @@ class Splash {
         this.message = document.querySelector(".message");
         this.progress = document.querySelector(".progress");
 
+        // Valeurs par défaut (au cas où la récupération échoue)
+        this.configBaseURL = 'https://siphonium.alwaysdata.net/launcher/config-launcher/config.json';
+        this.downloadBaseURL = 'https://siphonium.alwaysdata.net/launcher/download/version.txt';
+        this.downloadFileURL = 'https://siphonium.alwaysdata.net/siphonium%20Launcher-win-x64.exe';
+
         document.addEventListener('DOMContentLoaded', async () => {
             if (process.platform === 'win32') ipcRenderer.send('update-window-progress-load');
             this.startAnimation();
@@ -45,13 +50,45 @@ class Splash {
         this.message.classList.add("opacity");
         await sleep(1000);
 
+        // On commence par récupérer les URLs dynamiques
+        await this.fetchTunnelUrls();
+
+        // Ensuite on lance la vérification de mise à jour
         this.checkUpdate();
+    }
+
+    async fetchTunnelUrls() {
+        try {
+            const res = await nodeFetch('https://siphonium.github.io/url/tunnels.txt');
+            if (!res.ok) throw new Error("Impossible de récupérer tunnels.txt");
+            const text = await res.text();
+
+            // Extraction des lignes
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            for (const line of lines) {
+                if (line.startsWith("SIPHONIUM-LAUNCHER-CONFIG")) {
+                    this.configBaseURL = line.split('=').pop().trim() + '/launcher/config-launcher/config.json';
+                } else if (line.startsWith("SIPHONIUM-LAUNCHER-DOWNLOAD")) {
+                    const base = line.split('=').pop().trim();
+                    this.downloadBaseURL = base + '/version.txt';
+                    this.downloadFileURL = base + '/siphonium%20Launcher-win-x64.exe';
+                }
+            }
+
+            console.log("URLs mises à jour :", {
+                config: this.configBaseURL,
+                version: this.downloadBaseURL,
+                exe: this.downloadFileURL
+            });
+        } catch (err) {
+            console.error("Erreur récupération tunnels.txt :", err);
+        }
     }
 
     async checkUpdate() {
         this.setStatus(`Recherche de mise à jour...`);
 
-        const UPDATE_CHECK_ENABLED = true; // false = désactive la vérification
+        const UPDATE_CHECK_ENABLED = true;
         if (!UPDATE_CHECK_ENABLED) {
             console.log("Check update désactivé.");
             this.maintenanceCheck();
@@ -59,13 +96,13 @@ class Splash {
         }
 
         try {
-            const res = await nodeFetch('https://siphonium.alwaysdata.net/launcher/download/version.txt');
+            const res = await nodeFetch(this.downloadBaseURL);
             if (!res.ok) throw new Error("Impossible de récupérer la version en ligne.");
             const latestVersion = (await res.text()).trim();
 
             if (latestVersion !== pkg.version) {
                 if (os.platform() === 'win32') {
-                    const downloadURL = 'https://siphonium.alwaysdata.net/launcher/download/siphonium%20Launcher-win-x64.exe';
+                    const downloadURL = this.downloadFileURL;
                     this.setStatus(`Mise à jour disponible !<br><div class="download-update">Télécharger</div>`);
 
                     document.querySelector(".download-update").addEventListener("click", async () => {
@@ -103,7 +140,7 @@ class Splash {
 
     async maintenanceCheck() {
         try {
-            const res = await nodeFetch('https://siphonium.alwaysdata.net/launcher/config/launcher/config-launcher/config.json');
+            const res = await nodeFetch(this.configBaseURL);
             const configLauncher = await res.json();
             if (configLauncher.maintenance) {
                 this.shutdown(configLauncher.maintenance_message);
@@ -156,6 +193,6 @@ document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey && e.shiftKey && e.keyCode === 73) || e.keyCode === 123) {
         ipcRenderer.send("update-window-dev-tools");
     }
-})
+});
 
 new Splash();
