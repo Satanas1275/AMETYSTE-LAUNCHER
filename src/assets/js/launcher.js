@@ -222,6 +222,23 @@ class Launcher {
                     this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
+                } else if (account.meta.type == 'Custom') {
+                    console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
+                    popupRefresh.openPopup({
+                        title: 'Connexion',
+                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        color: 'var(--color)',
+                        background: false
+                    });
+                    // Ici, tu pourrais vérifier le token côté API si tu veux (optionnel)
+                    // Pour un système simple, on considère que le compte est toujours valide
+
+                    // Simule un refresh : on remet les mêmes infos
+                    let refresh_accounts = { ...account };
+                    refresh_accounts.ID = account_ID;
+                    await this.db.updateData('accounts', refresh_accounts, account_ID);
+                    await addAccount(refresh_accounts);
+                    if (account_ID == account_selected) accountSelect(refresh_accounts);
                 } else {
                     console.error(`[Account] ${account.name}: Account Type Not Found`);
                     this.db.deleteData('accounts', account_ID)
