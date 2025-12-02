@@ -6,3 +6,5 @@ dist
 node-v*
 data
 .DS_Store
+.qodo
+.vscode

@@ -1,6 +1,6 @@
 /**
  * @author Luuxis
- * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
+ * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 // import panel
 import Login from './panels/login.js';
@@ -14,7 +14,6 @@ const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 // libs
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
-const os = require('os');
 
 class Launcher {
     async init() {
@@ -22,7 +21,7 @@ class Launcher {
         console.log('Initializing Launcher...');
         this.shortcut()
         await setBackground()
-        this.initFrame();
+        if (process.platform == 'win32') this.initFrame();
         this.config = await config.GetConfig().then(res => res).catch(err => err);
         if (await this.config.error) return this.errorConnect()
         this.db = new database();
@@ -62,16 +61,15 @@ class Launcher {
 
     initFrame() {
         console.log('Initializing Frame...')
-        const platform = os.platform() === 'darwin' ? "darwin" : "other";
+        document.querySelector('.frame').classList.toggle('hide')
+        document.querySelector('.dragbar').classList.toggle('hide')
 
-        document.querySelector(`.${platform} .frame`).classList.toggle('hide')
-
-        document.querySelector(`.${platform} .frame #minimize`).addEventListener('click', () => {
+        document.querySelector('#minimize').addEventListener('click', () => {
             ipcRenderer.send('main-window-minimize');
         });
 
         let maximized = false;
-        let maximize = document.querySelector(`.${platform} .frame #maximize`);
+        let maximize = document.querySelector('#maximize')
         maximize.addEventListener('click', () => {
             if (maximized) ipcRenderer.send('main-window-maximize')
             else ipcRenderer.send('main-window-maximize');
@@ -80,7 +78,7 @@ class Launcher {
             maximize.classList.toggle('icon-restore-down')
         });
 
-        document.querySelector(`.${platform} .frame #close`).addEventListener('click', () => {
+        document.querySelector('#close').addEventListener('click', () => {
             ipcRenderer.send('main-window-close');
         })
     }
@@ -92,7 +90,7 @@ class Launcher {
         if (!configClient) {
             await this.db.createData('configClient', {
                 account_selected: null,
-                instance_select: null,
+                instance_selct: null,
                 java_config: {
                     java_path: null,
                     java_memory: {
@@ -224,6 +222,23 @@ class Launcher {
                     this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
+                } else if (account.meta.type == 'Custom') {
+                    console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
+                    popupRefresh.openPopup({
+                        title: 'Connexion',
+                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        color: 'var(--color)',
+                        background: false
+                    });
+                    // Ici, tu pourrais vérifier le token côté API si tu veux (optionnel)
+                    // Pour un système simple, on considère que le compte est toujours valide
+
+                    // Simule un refresh : on remet les mêmes infos
+                    let refresh_accounts = { ...account };
+                    refresh_accounts.ID = account_ID;
+                    await this.db.updateData('accounts', refresh_accounts, account_ID);
+                    await addAccount(refresh_accounts);
+                    if (account_ID == account_selected) accountSelect(refresh_accounts);
                 } else {
                     console.error(`[Account] ${account.name}: Account Type Not Found`);
                     this.db.deleteData('accounts', account_ID)
