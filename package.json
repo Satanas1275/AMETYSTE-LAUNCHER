@@ -1,20 +1,20 @@
 {
-    "name": "siphonium-Launcher",
-    "preductname": "siphonium Launcher",
-    "version": "1.1.0",
-    "description": "Launcher Mincraft pour le serveur siphonium",
+    "name": "Selvania-Launcher",
+    "preductname": "Selvania Launcher",
+    "version": "2.1.4",
+    "description": "Launcher Mincraft pour le serveur Selvania",
     "main": "src/app.js",
     "author": {
-        "name": "Satanas1275 Inc.",
-        "email": "siphonium@alwaysdata.net",
-        "url": "https://github.com/SIPHONIUM"
+        "name": "luuxis, Inc.",
+        "email": "contact@luuxis.fr",
+        "url": "https://github.com/luuxis"
     },
-    "url": "https://siphonium.alwaysdata.net/launcher/config",
+    "url": "http://launcher.luuxis.fr",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=true --build=platform",
-        "icon": "node build.js --icon=https://github.com/SIPHONIUM/launcher/blob/12a012505ccc9e952df861cdeaff65e5cf3e57c7/src/assets/images/icon.png?raw=true"
+        "icon": "node build.js --icon=https://raw.githubusercontent.com/luuxis/Selvania-Launcher/master/src/assets/images/icon.png"
     },
     "license": "CCANC",
     "nodemonConfig": {
@@ -22,24 +22,23 @@
         "ignore": "**/test"
     },
     "dependencies": {
-        "electron-updater": "^6.1.8",
-        "minecraft-java-core": "^3.10.4",
+        "electron-updater": "^6.6.2",
+        "minecraft-java-core": "^4.2.3",
         "node-bdd": "^2.0.4",
         "node-fetch": "^2.7.0",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {
-        "cross-env": "^7.0.3",
-        "electron": "^30.0.9",
-        "electron-builder": "^24.13.3",
-        "javascript-obfuscator": "^4.1.0",
-        "jimp": "^0.22.12",
-        "nodemon": "^3.1.2",
+        "cross-env": "^10.1.0",
+        "electron": "^39.2.4",
+        "electron-builder": "^26.0.12",
+        "javascript-obfuscator": "^4.1.1",
+        "jimp": "^1.6.0",
+        "nodemon": "^3.1.11",
         "png2icons": "^2.0.1"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/SIPHONIUM/launcher.git"
+        "url": "git+https://github.com/luuxis/Selvania-Launcher.git"
     }
 }
-

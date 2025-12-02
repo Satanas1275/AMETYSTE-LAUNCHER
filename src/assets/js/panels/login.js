@@ -1,6 +1,6 @@
 /**
  * @author Luuxis
- * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 const { AZauth, Mojang } = require('minecraft-java-core');
 const { ipcRenderer } = require('electron');
@@ -19,8 +19,6 @@ class Login {
             if (this.config.online.match(/^(http|https):\/\/[^ "]+$/)) {
                 this.getAZauth();
             }
-        } if (this.config.online === 'custom') {
-            this.getCustomAuth();
         }
         
         document.querySelector('.cancel-home').addEventListener('click', () => {
@@ -28,72 +26,6 @@ class Login {
             changePanel('settings')
         })
     }
-
-
-
-// Ajoute cette méthode dans la classe Login
-
-async getCustomAuth() {
-    console.log('Initializing custom auth login...');
-    let PopupLogin = new popup();
-    let loginCustom = document.querySelector('.login-custom'); // Crée un bloc HTML pour ton login custom
-
-    let customEmail = document.querySelector('.email-custom');
-    let customPassword = document.querySelector('.password-custom');
-    let connectCustomBtn = document.querySelector('.connect-custom');
-    loginCustom.style.display = 'block';
-
-    connectCustomBtn.addEventListener('click', async () => {
-        PopupLogin.openPopup({
-            title: 'Connexion en cours...',
-            content: 'Veuillez patienter...',
-            color: 'var(--color)'
-        });
-
-        if (customEmail.value === '' || customPassword.value === '') {
-            PopupLogin.openPopup({
-                title: 'Erreur',
-                content: 'Veuillez remplir tous les champs.',
-                options: true
-            });
-            return;
-        }
-
-        // Appelle ton endpoint d'auth ici
-        let response = await fetch('https://siphonium.alwaysdata.net/launcher/config/login/api_login.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: customEmail.value,
-                password: customPassword.value
-            })
-        });
-        let data = await response.json();
-
-        if (!response.ok || data.error) {
-            PopupLogin.openPopup({
-                title: 'Erreur',
-                content: data.message || 'Erreur de connexion.',
-                options: true
-            });
-            return;
-        }
-
-        // Adapte cet objet pour matcher ce que saveData attend
-        await this.saveData({
-            name: data.username, // ou data.pseudo, adapte selon ta réponse d'API
-            uuid: data.uuid || '', // optionnel, selon ton API
-            token: data.token || '',
-            meta: {
-                type: "Custom"
-            },
-            ...data // ajoute d'autres champs utiles
-        });
-        PopupLogin.closePopup();
-    });
-}
-
-
 
     async getMicrosoft() {
         console.log('Initializing Microsoft login...');
@@ -262,7 +194,7 @@ async getCustomAuth() {
     async saveData(connectionData) {
         let configClient = await this.db.readData('configClient');
         let account = await this.db.createData('accounts', connectionData)
-        let instanceSelect = configClient.instance_selct
+        let instanceSelect = configClient.instance_select
         let instancesList = await config.getInstanceList()
         configClient.account_selected = account.ID;
 
@@ -272,7 +204,7 @@ async getCustomAuth() {
                 if (whitelist !== account.name) {
                     if (instance.name == instanceSelect) {
                         let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
-                        configClient.instance_selct = newInstanceSelect.name
+                        configClient.instance_select = newInstanceSelect.name
                         await setStatus(newInstanceSelect.status)
                     }
                 }

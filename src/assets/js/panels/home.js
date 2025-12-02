@@ -1,6 +1,6 @@
 /**
  * @author Luuxis
- * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
+ * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 import { config, database, logger, changePanel, appdata, setStatus, pkg, popup } from '../utils.js'
 
@@ -104,7 +104,7 @@ class Home {
         let configClient = await this.db.readData('configClient')
         let auth = await this.db.readData('accounts', configClient.account_selected)
         let instancesList = await config.getInstanceList()
-        let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct) ? configClient?.instance_selct : null
+        let instanceSelect = instancesList.find(i => i.name == configClient?.instance_select) ? configClient?.instance_select : null
 
         let instanceBTN = document.querySelector('.play-instance')
         let instancePopup = document.querySelector('.instance-popup')
@@ -119,7 +119,7 @@ class Home {
         if (!instanceSelect) {
             let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
             let configClient = await this.db.readData('configClient')
-            configClient.instance_selct = newInstanceSelect.name
+            configClient.instance_select = newInstanceSelect.name
             instanceSelect = newInstanceSelect.name
             await this.db.updateData('configClient', configClient)
         }
@@ -131,7 +131,7 @@ class Home {
                     if (instance.name == instanceSelect) {
                         let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
                         let configClient = await this.db.readData('configClient')
-                        configClient.instance_selct = newInstanceSelect.name
+                        configClient.instance_select = newInstanceSelect.name
                         instanceSelect = newInstanceSelect.name
                         setStatus(newInstanceSelect.status)
                         await this.db.updateData('configClient', configClient)
@@ -151,19 +151,19 @@ class Home {
                 if (activeInstanceSelect) activeInstanceSelect.classList.toggle('active-instance');
                 e.target.classList.add('active-instance');
 
-                configClient.instance_selct = newInstanceSelect
+                configClient.instance_select = newInstanceSelect
                 await this.db.updateData('configClient', configClient)
                 instanceSelect = instancesList.filter(i => i.name == newInstanceSelect)
                 instancePopup.style.display = 'none'
                 let instance = await config.getInstanceList()
-                let options = instance.find(i => i.name == configClient.instance_selct)
+                let options = instance.find(i => i.name == configClient.instance_select)
                 await setStatus(options.status)
             }
         })
 
         instanceBTN.addEventListener('click', async e => {
             let configClient = await this.db.readData('configClient')
-            let instanceSelect = configClient.instance_selct
+            let instanceSelect = configClient.instance_select
             let auth = await this.db.readData('accounts', configClient.account_selected)
 
             if (e.target.classList.contains('instance-select')) {
@@ -202,7 +202,7 @@ class Home {
         let configClient = await this.db.readData('configClient')
         let instance = await config.getInstanceList()
         let authenticator = await this.db.readData('accounts', configClient.account_selected)
-        let options = instance.find(i => i.name == configClient.instance_selct)
+        let options = instance.find(i => i.name == configClient.instance_select)
 
         let playInstanceBTN = document.querySelector('.play-instance')
         let infoStartingBOX = document.querySelector('.info-starting-game')
@@ -230,7 +230,12 @@ class Home {
 
             ignored: [...options.ignored],
 
-            javaPath: configClient.java_config.java_path,
+            java: {
+                path: configClient.java_config.java_path,
+            },
+
+            JVM_ARGS:  options.jvm_args ? options.jvm_args : [],
+            GAME_ARGS: options.game_args ? options.game_args : [],
 
             screen: {
                 width: configClient.game_config.screen_size.width,

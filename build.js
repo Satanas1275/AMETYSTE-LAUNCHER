@@ -4,7 +4,7 @@ const builder = require('electron-builder')
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const nodeFetch = require('node-fetch')
 const png2icons = require('png2icons');
-const Jimp = require('jimp');
+const { Jimp, JimpMime } = require('jimp');
 
 const { preductname } = require('./package.json');
 
@@ -65,13 +65,20 @@ class Index {
                 generateUpdatesFilesForAllChannels: false,
                 appId: preductname,
                 productName: preductname,
-                copyright: 'Copyright © 2025 Satanas1275',
+                copyright: 'Copyright © 2020-2024 Luuxis',
                 artifactName: "${productName}-${os}-${arch}.${ext}",
                 extraMetadata: { main: 'app/app.js' },
                 files: ["app/**/*", "package.json", "LICENSE.md"],
-                directories: { "output": "dist" },
-                compression: 'maximum',
+                directories: {
+                    "output": "dist"
+                },
+                compression: 'normal',
                 asar: true,
+                electronDownload: {
+                    cache: "./node_modules/.cache/electron"
+                },
+                nodeGypRebuild: false,
+                npmRebuild: true,
                 publish: [{
                     provider: "github",
                     releaseType: 'release',
@@ -93,6 +100,10 @@ class Index {
                     icon: "./app/assets/images/icon.icns",
                     category: "public.app-category.games",
                     identity: null,
+                    hardenedRuntime: false,
+                    gatekeeperAssess: false,
+                    mergeASARs: true,
+                    singleArchFiles: "node_modules/sqlite3/**/*",
                     target: [{
                         target: "dmg",
                         arch: "universal"
@@ -101,6 +112,15 @@ class Index {
                         target: "zip",
                         arch: "universal"
                     }]
+                },
+                dmg: {
+                    sign: false,
+                    contents: [
+                        { x: 130, y: 220 },
+                        { x: 410, y: 220, type: 'link', path: '/Applications' }
+                    ],
+                    artifactName: "${productName}-mac-${arch}.${ext}",
+                    format: "ULFO"
                 },
                 linux: {
                     icon: "./app/assets/images/icon.png",
@@ -131,15 +151,15 @@ class Index {
     }
 
     async iconSet(url) {
-        let Buffer = await nodeFetch(url)
-        if (Buffer.status == 200) {
-            Buffer = await Buffer.buffer()
-            const image = await Jimp.read(Buffer);
-            Buffer = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG)
-            fs.writeFileSync("src/assets/images/icon.icns", png2icons.createICNS(Buffer, png2icons.BILINEAR, 0));
-            fs.writeFileSync("src/assets/images/icon.ico", png2icons.createICO(Buffer, png2icons.HERMITE, 0, false));
-            fs.writeFileSync("src/assets/images/icon.png", Buffer);
-            console.log('new icon set')
+        const response = await nodeFetch(url)
+        if (response.status == 200) {
+            const buffer = await response.buffer()
+            let image = await Jimp.read(buffer);
+            image = await image.resize({ w: 256, h: 256 }).getBuffer(JimpMime.png);
+            fs.writeFileSync("src/assets/images/icon.icns", png2icons.createICNS(image, png2icons.BILINEAR, 0));
+            fs.writeFileSync("src/assets/images/icon.ico", png2icons.createICO(image, png2icons.HERMITE, 0, false));
+            fs.writeFileSync("src/assets/images/icon.png", image);
+            // console.log('new icon set')
         } else {
             console.log('connection error')
         }
