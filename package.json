@@ -1,20 +1,20 @@
 {
     "name": "Ametyste-Launcher",
     "productName": "Ametyste Launcher",
-    "version": "2.1.4",
+    "version": "1.0.0",
     "description": "Launcher Mincraft pour le serveur Ametyste",
     "main": "src/app.js",
     "author": {
         "name": "Satanas1275",
-        "email": "contact@luuxis.fr",
-        "url": "https://github.com/luuxis"
+        "email": "satanas2077@proton.me",
+        "url": "https://github.com/Satanas1275"
     },
     "url": "https://launcher-ametyste.rocknite-studio.com",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=true --build=platform",
-        "icon": "node build.js --icon=https://raw.githubusercontent.com/luuxis/Selvania-Launcher/master/src/assets/images/icon.png"
+        "icon": "node build.js --icon=https://raw.githubusercontent.com/Satanas1275/AMETYSTE-LAUNCHER/master/src/assets/images/icon.png"
     },
     "license": "CCANC",
     "nodemonConfig": {

@@ -1,5 +1,4 @@
 # Generated
-node_modules
 app
 test
 dist
@@ -8,5 +7,4 @@ data
 .DS_Store
 .qodo
 .vscode
-!node_modules/minecraft-java-core/
-!node_modules/minecraft-java-core/**
+node_modules
