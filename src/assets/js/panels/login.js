@@ -60,7 +60,7 @@ async getCustomAuth() {
         }
 
         // Appelle ton endpoint d'auth ici
-        let response = await fetch('https://siphonium.rocknite-studio.com/login/api_login.php', {
+        let response = await fetch('https://launcher-ametyste.rocknite-studio.com/login/api_login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

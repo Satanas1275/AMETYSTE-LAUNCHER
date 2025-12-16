@@ -48,3 +48,68 @@
     padding: 0.4rem 1rem;
     margin-top: 10px;
 }
+
+/* ===== LOGIN CUSTOM ===== */
+.login-custom {
+    position: absolute;
+    padding: 15px;
+    background: var(--background);
+    border-radius: 15px;
+    text-align: center;
+    min-width: 40%;
+    color: var(--color);
+}
+
+/* Titre */
+.login-custom h1 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+/* Inputs */
+.login-custom input {
+    color: var(--color);
+    background: none;
+    border: solid 2px var(--element-color);
+    border-radius: 30px;
+    width: 50%;
+    padding: 0.4rem 1rem;
+    margin-top: 10px;
+    outline: none;
+    font-size: 1rem;
+}
+
+/* Bouton */
+.login-custom .connect-custom {
+    background: none;
+    color: var(--color);
+    border: solid 4px var(--element-color);
+    border-radius: 10px;
+    padding: 0.3rem 4rem;
+    font-size: inherit;
+    font-weight: bold;
+    margin: 20px 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.login-custom .connect-custom:hover {
+    background: var(--element-color);
+    color: var(--background);
+}
+
+/* Texte et lien */
+.login-custom p {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.login-custom a {
+    color: var(--element-color);
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.login-custom a:hover {
+    text-decoration: underline;
+}
